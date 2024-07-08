@@ -1,0 +1,8 @@
+{
+  "hard-rule": "Csak a kód a releváns!",
+  "rules": [
+    "A kód tartalmaz docstringet",
+    "Az egyik változó neve az, hogy alma, a másik változó neve az, hogy barack",
+    "A kód csak az összeadás aritmetikai műveletet használja"
+  ]
+}
