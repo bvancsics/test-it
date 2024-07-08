@@ -6,28 +6,6 @@ import os
 
 def get_messages(value_on_submit):
     return get_answers(value_on_submit)
-    return [
-        {
-            "direction": "outgoing",
-            "avatar": "user.png",
-            "content": "hello " + value_on_submit
-        },
-        {
-            "direction": "received",
-            "avatar": "bot.png",
-            "content": lorem.sentence()
-        },
-        {
-            "direction": "outgoing",
-            "avatar": "user.png",
-            "content": lorem.sentence()
-        },
-        {
-            "direction": "received",
-            "avatar": "bot.png",
-            "content": lorem.sentence()
-        }
-    ]
 
 
 def read_rules_from_json():
@@ -46,30 +24,17 @@ def get_answers(value_on_submit):
 
 
 def get_chatgpt_responses(value_on_submit, client, messages, rules):
-
     # Start message from UI
     message = value_on_submit
     all_chat_messages = [{"direction": "outgoing", "avatar": "user.png", "content": message}]
     message = value_on_submit + rules['hard-rule']
 
     # First answer and first generated code
-    """messages.append({"role": "user", "content": message})
-    response = client.chat.completions.create(model="gpt-4o", messages=messages)
-    chat_message = response.choices[0].message.content
-    source_code_str = chat_message.split('```python')[1].split('```')[0]
-    all_chat_messages.append({"direction": "received", "avatar": "bot.png", "content": source_code_str})
-    messages.append({"role": "assistant", "content": chat_message})"""
     messages, all_chat_messages, source_code_str = get_first_generated_code(message, messages, client, all_chat_messages)
 
     while len(rules['rules']) > 0:
         # Rule - pass or not?
         current_rule = rules['rules'].pop(0)
-
-        """message = current_rule + ', igen vagy nem? ' + str(source_code_str)
-        all_chat_messages.append({"direction": "outgoing", "avatar": "user.png", "content": current_rule + ', igen vagy nem?'})
-        messages.append({"role": "user", "content": message})
-        response = client.chat.completions.create(model="gpt-4o", messages=messages)
-        chat_message = response.choices[0].message.content"""
         all_chat_messages, chat_message, messages = send_the_question(current_rule, source_code_str, messages, client, all_chat_messages)
 
         # Good generated code
@@ -78,22 +43,6 @@ def get_chatgpt_responses(value_on_submit, client, messages, rules):
         elif str(chat_message).startswith("Nem"):
             # Not good -> regenerate based on rule
             all_chat_messages.append({"direction": "received", "avatar": "bot.png", "content": chat_message})
-            """_tmp_message = "Alakítsd át felszólító móddá az alábbi mondatot: " + current_rule
-            messages.append({"role": "user", "content": _tmp_message})
-            _tmp_response = client.chat.completions.create(model="gpt-4o", messages=messages)
-            _tmp_chat_message = _tmp_response.choices[0].message.content
-
-            message = 'Módosítsd az alábbi kódot, úgy hogy ' + _tmp_chat_message
-            all_chat_messages.append({"direction": "outgoing", "avatar": "user.png", "content": message})"""
-
-
-            """message += '. ' + rules['hard-rule'] + '.\n' + source_code_str
-            messages.append({"role": "user", "content": message})
-            response = client.chat.completions.create(model="gpt-4o", messages=messages)
-            chat_message = response.choices[0].message.content
-            source_code_str = chat_message.split('```python')[1].split('```')[0]
-            all_chat_messages.append({"direction": "received", "avatar": "bot.png", "content": source_code_str})
-            messages.append({"role": "assistant", "content": chat_message})"""
             source_code_str, messages, all_chat_messages = code_regenerate_based_on_rule(current_rule, messages, client,
                                                                                          all_chat_messages, rules, source_code_str)
 
