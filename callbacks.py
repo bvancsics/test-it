@@ -18,12 +18,6 @@ def send_message(n_submit, value_on_submit, msg_list):
     else:
         msg_list = msg_list + [
             dch.ChatMessage(
-                value_on_submit,
-                avatar="user.png",
-                direction="outgoing",
-            )
-        ] + [
-            dch.ChatMessage(
                 m["content"],
                 avatar=m["avatar"],
                 direction=m["direction"],
